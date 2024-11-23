@@ -1,6 +1,6 @@
 // Build the metadata panel
 function buildMetadata(sample) {
-  d3.csv("Salaries_with_job_categories_and_regions_cleaned_refined.csv").then((data) => {
+  d3.csv("CSV Files/Salaries_with_job_categories_and_regions_cleaned_refined.csv").then((data) => {
 
     // get the metadata field
     let metadata = data.metadata;
@@ -26,7 +26,7 @@ function buildMetadata(sample) {
 }
 
 // function to build charts
-d3.csv("Salaries_with_job_categories_and_regions_cleaned_refined.csv").then(function(data) {
+d3.csv("CSV Files/Salaries_with_job_categories_and_regions_cleaned_refined.csv").then(function(data) {
   // Group data by year and job category
   let groupedData = {};
   data.forEach(d => {
