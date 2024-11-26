@@ -26,7 +26,7 @@ function buildMetadata(sample) {
 }
 
 // function to build charts
-d3.csv("CSV Files/Salaries_with_job_categories_and_regions_cleaned_refined.csv").then(function(data) {
+d3.csv("CSV Files/Clean_Data_Jobs.csv").then(function(data) {
   // Group data by year and job category
   let groupedData = {};
   data.forEach(d => {
@@ -36,7 +36,7 @@ d3.csv("CSV Files/Salaries_with_job_categories_and_regions_cleaned_refined.csv")
     if (!groupedData[d.work_year][d.Job_Category]) {
       groupedData[d.work_year][d.Job_Category] = [];
     }
-    groupedData[d.work_year][d.Job_Category].push(d.salary_in_usd);
+    groupedData[d.work_year][d.Job_Category].push(d.salary);
   });
 
   // Calculate average salary for each year and job category
@@ -94,28 +94,32 @@ data.forEach(d => {
     };
   }
   bubbleData[d.experience_level][d.Job_Category].count++;
-  bubbleData[d.experience_level][d.Job_Category].salaries.push(+d.salary_in_usd); 
+  bubbleData[d.experience_level][d.Job_Category].salaries.push(+d.salary); 
 });
+
+const experienceLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
+
 
 // Calculate average salary for each group
 const bubbleTraces = [];
-for (const expLevel in bubbleData) {
+experienceLevels.forEach(expLevel => {
   for (const jobCategory in bubbleData[expLevel]) {
     const count = bubbleData[expLevel][jobCategory].count;
     const avgSalary = d3.mean(bubbleData[expLevel][jobCategory].salaries);
     bubbleTraces.push({
-      x: [expLevel], 
-      y: [avgSalary], 
+      x: [expLevel],
+      y: [avgSalary],
       mode: 'markers',
       marker: {
-        size: count * .05, // Adjust the multiplier?
-        color: getColor(jobCategory), 
+        size: count * .05,
+        color: getColor(jobCategory),
         opacity: 0.7
       },
       name: jobCategory
     });
   }
-}
+});
+
 
 // Function to get color based on job category
 function getColor(jobCategory) {
@@ -142,8 +146,69 @@ const bubbleLayout = {
 };
 
 Plotly.newPlot('bubble', bubbleTraces, bubbleLayout);
+
+// ADD HEATMEAP HERE
+function updateHeatmap(workplaceType) {
+  const filteredData = data.filter(d => d.workplace_type === workplaceType || workplaceType === 'all');
+
+  const jobCategories = [];
+  const experienceLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
+
+  filteredData.forEach(d => {
+    if (!jobCategories.includes(d.Job_Category)) {
+      jobCategories.push(d.Job_Category);
+    }
+  });
+
+  const heatmapMatrix = [];
+  jobCategories.forEach((jobCategory, y) => {
+    const row = [];
+    experienceLevels.forEach((expLevel, x) => {
+      const filteredForAvg = filteredData.filter(d => 
+        d.Job_Category === jobCategory && d.experience_level === expLevel
+      );
+      const avgSalary = filteredForAvg.length > 0 ? d3.mean(filteredForAvg.map(d => d.salary)) : 0;
+      row.push(avgSalary);
+    });
+    heatmapMatrix.push(row);
+  });
+
+  const heatmapTrace = {
+    z: heatmapMatrix,
+    x: experienceLevels,
+    y: jobCategories,
+    type: 'heatmap',
+    colorscale: 'hot',
+    colorbar: {
+      title: 'Average Salary (USD)'
+    }
+  };
+
+  const heatmapLayout = {
+    title: 'Average Salary by Job Category and Experience Level',
+    xaxis: {
+      title: 'Experience Level'
+    },
+    yaxis: {
+      title: 'Job Category',
+      tickangle: -60
+    }
+  };
+
+  Plotly.newPlot('heatmap', [heatmapTrace], heatmapLayout);
+}
+
+// Initial heatmap
+updateHeatmap('all');
+
+// Event listener for the dropdown
+document.getElementById('workplaceTypeFilter').addEventListener('change', () => {
+  const selectedType = document.getElementById('workplaceTypeFilter').value;
+  updateHeatmap(selectedType);
 });
-    
+});
+
+
     //OLD GRAPHS FROM PROJECT FOR REFERENCE
 //     let Colorscale = 'Viridis';
 
