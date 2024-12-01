@@ -2,18 +2,22 @@
 Data Analytics Job Market
 Overview
 This project performs data analysis on the job market for various data analytics-related roles. The analysis focuses on job titles, salaries, experience levels, employment types, and workplace types, using a dataset sourced from Kaggle. The project also includes visualizations to explore trends and insights regarding the data analytics job market.
+
 Participants
 •	Anvita Iyer
 •	Brian Hester
 •	Crystal Gonzales
 •	Emeka Osaseh
 •	Sam Williamson
+
 Data Source
 The dataset used for this analysis was sourced from Kaggle and contains information about job titles, salaries, work locations, and more, specifically related to data analytics roles. The file used is Salaries_with_job_categories.csv.
+
 Files Included
 •	Salaries_with_job_categories.csv: Original dataset.
 •	Clean_Data_Jobs.csv: A cleaned version of the dataset without salary and salary currency columns.
 •	Updated_Clean_Data_Jobs.csv: The final cleaned dataset with country names replacing location codes.
+
 Requirements
 The following libraries are required to run the analysis and visualizations:
 •	pandas: For data manipulation and analysis.
