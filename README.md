@@ -80,5 +80,15 @@ Future Work
   •	Additional Analysis: Analyze trends in job titles or salary variations across other features like company size or location.
   •	Prediction Models: Implement machine learning models to predict salaries based on experience, job category, or location.
 
+Ethical Considerations
+Throughout this project, we have taken several steps to ensure that ethical considerations were addressed. 
+First, we ensured that the dataset used for analysis is publicly available on Kaggle, meaning that the data was shared with the consent of the contributors and is intended for public use. 
+Additionally, we selected a data set which was respectful of sensitive data which was handled with care by focusing on anonymizing aspects like company locations and employment details. 
+We also considered fairness when categorizing job titles, ensuring that titles were appropriately grouped into categories based on clear definitions to avoid misclassification. 
+Further efforts were made to avoid bias in the analysis by examining trends across various job categories, experience levels, and geographic regions without overgeneralizing or making
+assumptions about any particular group. Finally, we emphasized the importance of transparency and reproducibility by documenting all data manipulation and visualization steps, ensuring that
+others can review, verify, and build upon our findings.
+
+
 License
 This project is licensed under the MIT License 
