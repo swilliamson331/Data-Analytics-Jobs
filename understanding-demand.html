@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding the Global Demand</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        canvas {
+            width: 40%;
+            margin: 20px auto;
+            display: block;
+            
+        }
+        #filterContainer {
+            text-align: center;
+            margin: 20px 0;
+            
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: blue;">Understanding the Global Demand</h1>
+
+    <!-- Dropdown menu for filtering -->
+    <div id="filterContainer">
+        <label for="dataFilter">Select Data Filter:</label>
+        <select id="dataFilter">
+            <option value="all">Total Jobs (All Countries)</option>
+            <option value="us">US Only</option>
+            <option value="non-us">All Countries Excluding US</option>
+        </select>
+    </div>
+
+    <!-- Bar chart canvas -->
+    <canvas id="myBarChart" width="400" height="200"></canvas>
+    <!-- Line chart canvas -->
+    <canvas id="myLineChart" width="400" height="200"></canvas>
+
+    <script>
+        let barChart, lineChart;
+
+        // Predefined colors for job categories
+        const categoryColors = {
+            "Machine Learning Engineer": "purple",
+            "Data Engineer": "blue",
+            "Data Analyst": "orange",
+            "Data Scientist": "green",
+            "Research Scientist": "brown",
+            "Data Management": "pink",
+            "Other": "red"
+        };
+
+        function getColor(category) {
+            return categoryColors[category] || "grey";
+        }
+
+        // Load CSV using PapaParse
+        Papa.parse("Clean_Data_Jobs.csv", {
+            download: true,
+            header: true,
+            complete: function(results) {
+                const allData = results.data;
+
+                // Initial render with "all" filter
+                updateCharts("all");
+
+                // Dropdown filter event listener
+                document.getElementById("dataFilter").addEventListener("change", function() {
+                    updateCharts(this.value);
+                });
+
+                function updateCharts(filter) {
+                    // Filter data based on the dropdown selection
+                    let filteredData;
+                    if (filter === "us") {
+                        filteredData = allData.filter(row => row.company_location === "US");
+                    } else if (filter === "non-us") {
+                        filteredData = allData.filter(row => row.company_location !== "US");
+                    } else {
+                        filteredData = allData;
+                    }
+
+                    // Bar Chart: Total job counts by year
+                    const jobCountsByYear = {};
+                    filteredData.forEach(row => {
+                        const year = parseInt(row.work_year);
+                        if (!jobCountsByYear[year]) {
+                            jobCountsByYear[year] = 0;
+                        }
+                        jobCountsByYear[year]++;
+                    });
+
+                    const barLabels = Object.keys(jobCountsByYear).map(year => parseInt(year));
+                    const barValues = Object.values(jobCountsByYear);
+
+                    // Update or create Bar Chart
+                    if (barChart) {
+                        barChart.data.labels = barLabels;
+                        barChart.data.datasets[0].data = barValues;
+                        barChart.update();
+                    } else {
+                        const barCtx = document.getElementById("myBarChart").getContext("2d");
+                        barChart = new Chart(barCtx, {
+                            type: "bar",
+                            data: {
+                                labels: barLabels,
+                                datasets: [{
+                                    label: `Total Jobs (${filter === "all" ? "All Locations" : filter === "us" ? "US Only" : "Non-US"})`,
+                                    data: barValues,
+                                    backgroundColor: "blue",
+                                    borderColor: "rgba(75, 192, 192, 1)",
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Line Chart: Job trends by category over the years
+                    const jobCategories = {};
+                    filteredData.forEach(row => {
+                        const year = parseInt(row.work_year);
+                        const category = row.Job_Category;
+                        if (!jobCategories[category]) {
+                            jobCategories[category] = {};
+                        }
+                        if (!jobCategories[category][year]) {
+                            jobCategories[category][year] = 0;
+                        }
+                        jobCategories[category][year]++;
+                    });
+
+                    const lineLabels = barLabels;
+                    const datasets = Object.keys(jobCategories).map(category => {
+                        const data = lineLabels.map(year => jobCategories[category][year] || 0);
+                        return {
+                            label: category,
+                            data: data,
+                            fill: false,
+                            borderColor: getColor(category),
+                            tension: 0.1
+                        };
+                    });
+
+                    // Update or create Line Chart
+                    if (lineChart) {
+                        lineChart.data.labels = lineLabels;
+                        lineChart.data.datasets = datasets;
+                        lineChart.update();
+                    } else {
+                        const lineCtx = document.getElementById("myLineChart").getContext("2d");
+                        lineChart = new Chart(lineCtx, {
+                            type: "line",
+                            data: {
+                                labels: lineLabels,
+                                datasets: datasets
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            },
+            error: function(err) {
+                console.error("Error loading CSV: ", err);
+            }
+        });
+    </script>
+</body>
+</html>

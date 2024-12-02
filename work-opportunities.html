@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>On-site, Hybrid & Remote Opportunities</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.4.4/dist/d3.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: blue;
+    }
+
+    #workplaceTypeFilter {
+      margin: 20px auto;
+      display: block;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    #heatmap {
+      width: 80%;
+      margin-top: 20px;
+      margin-left: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>On-site, Hybrid & Remote Opportunities</h1>
+
+  <!-- Dropdown filter -->
+  <select id="workplaceTypeFilter">
+    <option value="all">All</option>
+    <option value="In Person">In Person</option>
+    <option value="Hybrid">Hybrid</option>
+    <option value="Remote">Remote</option>
+  </select>
+
+  <!-- Heatmap container -->
+  <div id="heatmap"></div>
+
+  <script>
+    let data = []; // Global data variable
+
+    // Load data using D3.js
+    d3.csv("Clean_Data_Jobs.csv").then(function (loadedData) {
+      data = loadedData.map(d => ({
+        workplace_type: d.workplace_type,
+        Job_Category: d.Job_Category,
+        experience_level: d.experience_level,
+        salary: +d.salary // Convert salary to number
+      }));
+
+      // Heatmap update function
+      function updateHeatmap(workplaceType) {
+        const filteredData = data.filter(d => d.workplace_type === workplaceType || workplaceType === 'all');
+
+        // Get unique job categories and experience levels
+        const jobCategories = Array.from(new Set(filteredData.map(d => d.Job_Category)));
+        const experienceLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
+
+        // Create heatmap matrix
+        const heatmapMatrix = jobCategories.map(jobCategory =>
+          experienceLevels.map(expLevel => {
+            const relevantData = filteredData.filter(
+              d => d.Job_Category === jobCategory && d.experience_level === expLevel
+            );
+            return relevantData.length > 0 ? d3.mean(relevantData.map(d => d.salary)) : 0;
+          })
+        );
+
+        // Define heatmap trace
+        const heatmapTrace = {
+          z: heatmapMatrix,
+          x: experienceLevels,
+          y: jobCategories,
+          type: 'heatmap',
+          colorscale: 'hot',
+          colorbar: {
+            title: 'Average Salary (USD)'
+          }
+        };
+
+        // Define heatmap layout
+        const heatmapLayout = {
+          title: 'Average Salary by Job Category and Experience Level',
+          xaxis: {
+            title: 'Experience Level'
+          },
+          yaxis: {
+            title: 'Job Category',
+            automargin: true
+          }
+        };
+
+        // Render heatmap
+        Plotly.newPlot('heatmap', [heatmapTrace], heatmapLayout);
+      }
+
+      // Initial heatmap render
+      updateHeatmap('all');
+
+      // Event listener for the dropdown
+      document.getElementById('workplaceTypeFilter').addEventListener('change', () => {
+        const selectedType = document.getElementById('workplaceTypeFilter').value;
+        updateHeatmap(selectedType);
+      });
+    });
+  </script>
+</body>
+
+</html>
