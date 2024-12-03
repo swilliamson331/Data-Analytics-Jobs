@@ -14,10 +14,12 @@ Participants
 Data Source
 The dataset used for this analysis was sourced from Kaggle and contains information about job titles, salaries, work locations, and more, specifically related to data analytics roles. The file used is Salaries_with_job_categories.csv.
 
-Files Included
+Key Files Included
   •	Salaries_with_job_categories.csv: Original dataset.
   •	Clean_Data_Jobs.csv: A cleaned version of the dataset without salary and salary currency columns.
   •	Updated_Clean_Data_Jobs.csv: The final cleaned dataset with country names replacing location codes.
+  • Cleaned up Jupyter File.ipynb: Notebook for data cleaning and initial visualizations
+  • dashboardindex.html: HTML to open the interactive dashboard
 
 Requirements
 The following libraries are required to run the analysis and visualizations:
